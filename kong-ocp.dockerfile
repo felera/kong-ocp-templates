@@ -7,7 +7,7 @@ ENV KONG_ENTRYPOINT=https://raw.githubusercontent.com/Kong/docker-kong/master/do
 
 WORKDIR /tmp
 
-COPY kong.deb /tmp/kong.deb
+# COPY kong.deb /tmp/kong.deb
    
 RUN set -ex; \
     apt-get update \
