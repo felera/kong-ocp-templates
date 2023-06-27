@@ -28,13 +28,13 @@ ENV KONG_ENTRYPOINT=https://raw.githubusercontent.com/Kong/docker-kong/master/do
 
 
 RUN set -ex; 
+RUN adduser -u 1001 kong 
 RUN apt update 
 RUN apt install --yes wget
 RUN wget -O /tmp/kong.deb $KONG_INSTALLER 
 RUN apt-get install --yes /tmp/kong.deb 
 RUN rm -rf /var/lib/apt/lists/* 
 RUN rm -rf /tmp/kong.deb 
-RUN adduser -u 1001 kong 
 RUN usermod -aG 0 kong && 
 RUN chown kong:0 /usr/local/bin/kong 
 RUN chown -R kong:0 /usr/local/kong 
