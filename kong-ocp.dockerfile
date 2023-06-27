@@ -1,18 +1,16 @@
 
-#FROM ubuntu:20.04
-FROM ubi8/ubi-minimal:8.8-1014
+FROM docker.io/ubuntu:20.04
+#FROM ubi8/ubi-minimal:8.8-1014
 
 ENV KONG_INSTALLER=https://download.konghq.com/gateway-3.x-ubuntu-focal/pool/all/k/kong-enterprise-edition/kong-enterprise-edition_3.3.0.0_amd64.deb
 ENV KONG_ENTRYPOINT=https://raw.githubusercontent.com/Kong/docker-kong/master/docker-entrypoint.sh
-
-WORKDIR /tmp
 
 # COPY kong.deb /tmp/kong.deb
    
 # RUN set -ex; \
 #     apt update \
 #     && apt install wget \
-#     && wget -O kong.deb $KONG_INSTALLER \
+#     && wget -O /tmp/kong.deb $KONG_INSTALLER \
 #     && apt-get install --yes /tmp/kong.deb \
 #     && rm -rf /var/lib/apt/lists/* \
 #     && rm -rf /tmp/kong.deb \
@@ -25,16 +23,16 @@ WORKDIR /tmp
 #     && ln -s /usr/local/openresty/luajit/bin/luajit /usr/local/bin/lua \
 #     && ln -s /usr/local/openresty/nginx/sbin/nginx /usr/local/bin/nginx \
 #     && wget -O /docker-entrypoint.sh $KONG_ENTRYPOINT \
-#     && chmod +x docker-entrypoint.sh \
+#     && chmod +x /docker-entrypoint.sh \
 #     && kong version
 
+
 RUN set -ex; 
-RUN microdnf update 
-RUN microdnf install wget 
-RUN wget -O kong.deb $KONG_INSTALLER 
-RUN microdnf install -y ./kong.deb 
+RUN apt update 
+RUN RUN wget -O /tmp/kong.deb $KONG_INSTALLER 
+RUN apt-get install --yes /tmp/kong.deb 
 RUN rm -rf /var/lib/apt/lists/* 
-RUN rm -rf kong.deb 
+RUN rm -rf /tmp/kong.deb 
 RUN adduser -u 1001 kong 
 RUN usermod -aG 0 kong && 
 RUN chown kong:0 /usr/local/bin/kong 
@@ -44,10 +42,11 @@ RUN ln -s /usr/local/openresty/luajit/bin/luajit /usr/local/bin/luajit
 RUN ln -s /usr/local/openresty/luajit/bin/luajit /usr/local/bin/lua 
 RUN ln -s /usr/local/openresty/nginx/sbin/nginx /usr/local/bin/nginx 
 RUN wget -O /docker-entrypoint.sh $KONG_ENTRYPOINT 
-RUN chmod +x docker-entrypoint.sh 
+RUN chmod +x /docker-entrypoint.sh 
 RUN kong version
-       
    
+
+
 #COPY docker-entrypoint.sh /docker-entrypoint.sh
    
 USER 1001
