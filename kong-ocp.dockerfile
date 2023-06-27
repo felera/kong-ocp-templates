@@ -1,5 +1,5 @@
 
-FROM registry.hub.docker.com/ubuntu:20.04
+FROM docker.io/ubuntu:20.04
 #FROM ubi8/ubi-minimal:8.8-1014
 
 ENV KONG_INSTALLER=https://download.konghq.com/gateway-3.x-ubuntu-focal/pool/all/k/kong-enterprise-edition/kong-enterprise-edition_3.3.0.0_amd64.deb
