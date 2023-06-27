@@ -29,10 +29,10 @@ WORKDIR /tmp
 #     && kong version
 
 RUN set -ex; 
-RUN apt update 
-RUN && apt install wget 
+RUN microdnf update 
+RUN && microdnf install wget 
 RUN && wget -O kong.deb $KONG_INSTALLER 
-RUN && apt-get install --yes /tmp/kong.deb 
+RUN && microdnf install --yes /tmp/kong.deb 
 RUN && rm -rf /var/lib/apt/lists/* 
 RUN && rm -rf /tmp/kong.deb 
 RUN && adduser -u 1001 kong 
