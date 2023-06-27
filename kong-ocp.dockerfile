@@ -32,7 +32,7 @@ RUN set -ex;
 RUN microdnf update 
 RUN microdnf install wget 
 RUN wget -O kong.deb $KONG_INSTALLER 
-RUN microdnf install --yes /tmp/kong.deb 
+RUN microdnf install -y /tmp/kong.deb 
 RUN rm -rf /var/lib/apt/lists/* 
 RUN rm -rf /tmp/kong.deb 
 RUN adduser -u 1001 kong 
