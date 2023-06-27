@@ -29,7 +29,7 @@ ENV KONG_ENTRYPOINT=https://raw.githubusercontent.com/Kong/docker-kong/master/do
 
 RUN set -ex; 
 RUN apt update 
-RUN apt install wget
+RUN apt install --yes wget
 RUN wget -O /tmp/kong.deb $KONG_INSTALLER 
 RUN apt-get install --yes /tmp/kong.deb 
 RUN rm -rf /var/lib/apt/lists/* 
