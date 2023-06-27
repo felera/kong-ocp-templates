@@ -11,7 +11,7 @@ WORKDIR /tmp
    
 RUN set -ex; \
     apt update \
-    apt install wget \
+    && apt install wget \
     && wget -O kong.deb $KONG_INSTALLER \
     && apt-get install --yes /tmp/kong.deb \
     && rm -rf /var/lib/apt/lists/* \
