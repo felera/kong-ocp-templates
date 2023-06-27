@@ -30,13 +30,13 @@ WORKDIR /tmp
 
 RUN set -ex; 
 RUN microdnf update 
-RUN && microdnf install wget 
-RUN && wget -O kong.deb $KONG_INSTALLER 
-RUN && microdnf install --yes /tmp/kong.deb 
-RUN && rm -rf /var/lib/apt/lists/* 
-RUN && rm -rf /tmp/kong.deb 
-RUN && adduser -u 1001 kong 
-RUN && usermod -aG 0 kong && 
+RUN microdnf install wget 
+RUN wget -O kong.deb $KONG_INSTALLER 
+RUN microdnf install --yes /tmp/kong.deb 
+RUN rm -rf /var/lib/apt/lists/* 
+RUN rm -rf /tmp/kong.deb 
+RUN adduser -u 1001 kong 
+RUN usermod -aG 0 kong && 
 RUN chown kong:0 /usr/local/bin/kong 
 RUN chown -R kong:0 /usr/local/kong 
 RUN ln -s /usr/local/openresty/bin/resty /usr/local/bin/resty 
