@@ -1,0 +1,119 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: konga-deployment-template
+  labels:
+    app: konga
+    version: "1.0"
+parameters:
+- name: GITHUB_REPOSITORY_URL
+  description: GitHub repository URL
+  required: true
+- name: GITHUB_CONTEXT_DIR
+  description: Folder (context) containing the Dockerfile
+  required: true
+- name: IMAGE_NAME
+  description: Name of the image to build
+  required: true
+- name: DOCKER_CONFIG_JSON
+  description: Base64-encoded Docker config JSON for pull secret
+  required: true
+- name: POSTGRESQL_USER
+  description: PostgreSQL username for Konga
+  required: true
+- name: POSTGRESQL_PASSWORD
+  description: PostgreSQL password for Konga
+  required: true
+- name: POSTGRESQL_DATABASE
+  description: PostgreSQL database name for Konga
+  required: true
+- name: POSTGRESQL_HOSTNAME
+  description: Hostname of the PostgreSQL database
+  required: true
+objects:
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: dockerhub-pull-secret
+    labels:
+      app: konga
+  type: kubernetes.io/dockerconfigjson
+  data:
+    .dockerconfigjson: ${DOCKER_CONFIG_JSON}
+- kind: BuildConfig
+  apiVersion: build.openshift.io/v1
+  metadata:
+    name: ${IMAGE_NAME}-build
+    labels:
+      app: konga
+  spec:
+    source:
+      git:
+        uri: ${GITHUB_REPOSITORY_URL}
+      type: Git
+      contextDir: ${GITHUB_CONTEXT_DIR}
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nodejs:latest
+          namespace: openshift
+      type: Docker
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${IMAGE_NAME}:latest
+        namespace: openshift
+  triggers:
+    - type: ConfigChange
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: ${IMAGE_NAME}
+    labels:
+      app: konga
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: konga-deployment
+    labels:
+      app: konga
+  spec:
+    replicas: 1
+    selector:
+      app: konga
+    template:
+      metadata:
+        labels:
+          app: konga
+      spec:
+        containers:
+        - name: konga
+          image: ${IMAGE_NAME}:latest
+          ports:
+          - containerPort: 1337
+          env:
+            - name: NODE_ENV
+              value: development
+            - name: DB_ADAPTER
+              value: postgres
+            - name: DB_HOST
+              value: ${POSTGRESQL_HOSTNAME}
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: ${POSTGRESQL_USER}
+            - name: DB_PASSWORD
+              value: ${POSTGRESQL_PASSWORD}
+            - name: DB_DATABASE
+              value: ${POSTGRESQL_DATABASE}
+            - name: TOKEN_SECRET
+              value: YOUR_TOKEN_SECRET_HERE
+          volumeMounts:
+          - name: konga-data
+            mountPath: /app/konga/data
+        volumes:
+        - name: konga-data
+          emptyDir: {}
+- kind: Service
+  apiVersion: v1

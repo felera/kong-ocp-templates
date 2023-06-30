@@ -1,0 +1,20 @@
+# Use the latest Konga image as the base image
+FROM pantsel/konga:latest
+
+# Set the working directory to the Konga app directory
+WORKDIR /app/konga
+
+# Copy the custom config.js file to the app directory
+COPY config.js .
+
+# Copy the start.sh script to the app directory
+COPY start.sh .
+
+# Set the execute permissions for the start.sh script
+RUN chmod +x start.sh
+
+# Set the user to run Konga as a non-root user
+USER 1001
+
+# Start Konga using the start.sh script
+CMD ["./start.sh"]
