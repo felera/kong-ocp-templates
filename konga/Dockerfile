@@ -5,10 +5,10 @@ FROM pantsel/konga:latest
 WORKDIR /app/konga
 
 # Copy the custom config.js file to the app directory
-COPY config.js .
+COPY ./config.js .
 
 # Copy the start.sh script to the app directory
-COPY start.sh .
+COPY ./start.sh .
 
 # Set the execute permissions for the start.sh script
 RUN chmod +x start.sh
