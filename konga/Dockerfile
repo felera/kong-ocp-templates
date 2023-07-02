@@ -11,10 +11,10 @@ COPY ./config.js .
 COPY ./start.sh .
 
 # Set the execute permissions for the start.sh script
-RUN chmod +x start.sh
+RUN chmod +x start.sh 
 
 # Set the user to run Konga as a non-root user
-USER 1001
+USER konga
 
 # Start Konga using the start.sh script
 CMD ["./start.sh"]
