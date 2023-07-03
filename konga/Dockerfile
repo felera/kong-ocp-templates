@@ -1,21 +1,31 @@
-FROM pantsel/konga:latest
+FROM alpine:3.10
 
-ARG STORAGE_PATH=/app/konga/data
+RUN apk add --no-cache --update git curl busybox-suid shadow busybox-extras nodejs npm
 
-# Set the working directory
-WORKDIR ${STORAGE_PATH}
+WORKDIR /opt
+
+RUN adduser -D -u 1001 konga && usermod -aG 0 konga && \
+chown -R 1001 /home/konga /opt
+
+USER 1001
+ 
+RUN git clone https://github.com/pantsel/konga.git && cd konga && \
+npm set audit false && \
+npm install sails bower gulp && \
+npm install
 
 USER root
 
-COPY start.sh ${STORAGE_PATH}/start.sh
+COPY run /usr/bin/run
 
-# Set the group ownership recursively and change the file permissions
-RUN chgrp -R 0 ${STORAGE_PATH} && \
-    chmod -R g=u ${STORAGE_PATH} && \
-    chown -R 1001 ${STORAGE_PATH}
+RUN mkdir -p /opt/konga/custom_config && chown -R 1001 /usr/bin/run /home/konga /opt && \
+chgrp -R 0 /usr/bin/run /home/konga /opt && \
+chmod -R g=u /usr/bin/run /home/konga /opt
 
-# Change the user to 1001
 USER 1001
 
-# Start the Konga application
-CMD ["./start.sh"]
+EXPOSE 1337
+
+WORKDIR /opt/konga
+
+CMD ["/usr/bin/run"]

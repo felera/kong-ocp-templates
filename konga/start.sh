@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh -e
 
 # POSTGRESQL_HOST=$1
 
@@ -9,4 +9,9 @@
 # done
 
 # Run Konga
-exec npm start
+
+cd /opt/konga
+#exec npm run production
+exec npm run $NODE_ENV
+
+# exec npm start 
