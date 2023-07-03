@@ -1,21 +1,19 @@
-# Use the latest Konga image as the base image
 FROM pantsel/konga:latest
 
-# Set the working directory to the Konga app directory
-WORKDIR /app/konga
+ARG STORAGE_PATH=/app/konga/data
 
-# Copy the custom config.js file to the app directory
-COPY ./config.js .
+# Set the working directory
+WORKDIR ${STORAGE_PATH}
 
-# Copy the start.sh script to the app directory
-COPY ./start.sh .
+USER root
 
-# Set the execute permissions for the start.sh script and konga folder
-RUN chmod +x start.sh && chgrp -R 0 /app/konga && chmod -R g=u /app/konga 
+# Set the group ownership recursively and change the file permissions
+RUN chgrp -R 0 ${STORAGE_PATH} && \
+    chmod -R g=u ${STORAGE_PATH} && \
+    chown -R 1001:0 ${STORAGE_PATH}
 
-
-# Set the user to run Konga as a non-root user
+# Change the user to 1001
 USER 1001
 
-# Start Konga using the start.sh script
-CMD ["./start.sh"]
+# Start the Konga application
+CMD ["npm", "start"]
