@@ -1,13 +1,8 @@
-# kind: Namespace
-# apiVersion: v1
-# metadata:
-#   name: kong
-# ---
 kind: Template
 apiVersion: template.openshift.io/v1
 metadata:
   name: kong-template
-  namespace: kong
+
 parameters:
   - name: postgres_password
     description: Password for the PostgreSQL database
@@ -18,7 +13,9 @@ parameters:
   - name: postgres_database
     description: Name for the PostgreSQL database
     required: true    
+
 objects:
+
   - kind: ConfigMap
     apiVersion: v1
     metadata:
@@ -30,11 +27,11 @@ objects:
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
+
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
       name: kong-postgres-pvc
-      namespace: kong
       finalizers:
           - kubernetes.io/pvc-protection
     spec:
@@ -50,23 +47,21 @@ objects:
         - ReadWriteOnce
       capacity:
         storage: 5Gi
+
   - kind: Secret
     apiVersion: v1    
     metadata:
       name: kong-database-secret
-      namespace: kong
     type: Opaque
     data:
       postgres_password: ${postgres_password}
       postgres_user: ${postgres_password}
       postgres_database: ${postgres_database}
+
   - kind: DeploymentConfig
     apiVersion: apps.openshift.io/v1
     metadata:
-      # annotations:
-      #   template.alpha.openshift.io/wait-for-ready: "true"
       name: kong-database
-      namespace: kong
     spec:
       replicas: 1
       selector:
@@ -126,11 +121,11 @@ objects:
               namespace: openshift
           type: ImageChange
         - type: ConfigChange
+
   - kind: Service
     apiVersion: v1
     metadata:
       name: kong-database
-      namespace: kong
     spec:
       selector:
         app: kong-database
@@ -138,11 +133,11 @@ objects:
         - name: postgres
           port: 5432
           targetPort: 5432
+
   - kind: Service
     apiVersion: v1
     metadata:
       name: kong-database-nodeport
-      namespace: kong
     spec:
       externalTrafficPolicy: Cluster
       internalTrafficPolicy: Cluster
@@ -158,11 +153,11 @@ objects:
         app: kong-database
       sessionAffinity: None
       type: NodePort
+  
   - kind: Job
     apiVersion: batch/v1
     metadata:
       name: kong-migration
-      namespace: kong
     spec:
       template:
         metadata:
@@ -179,6 +174,11 @@ objects:
                   value: postgres
                 - name: KONG_PG_HOST
                   value: kong-database
+                - name: KONG_PG_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: kong-database-secret
+                      key: postgres_database 
                 - name: KONG_PG_USER
                   valueFrom:
                     secretKeyRef:
@@ -197,11 +197,11 @@ objects:
                   value: /dev/stderr
                 - name: KONG_ADMIN_ERROR_LOG
                   value: /dev/stderr
+
   - kind: Service
     apiVersion: v1
     metadata:
       name: kong-proxy
-      namespace: kong
     spec:
       selector:
         app: kong-proxy
@@ -212,20 +212,11 @@ objects:
         - name: admin
           port: 8001
           targetPort: 8001
-        # - name: manager
-        #   port: 8002
-        #   targetPort: 8002
-        # - name: portal
-        #   port: 8003
-        #   targetPort: 8003
-        # - name: portal-files
-        #   port: 8004
-        #   targetPort: 8004
+
   - kind: DeploymentConfig
     apiVersion: apps.openshift.io/v1
     metadata:
       name: kong-proxy
-      namespace: kong
       annotations:
         template.alpha.openshift.io/wait-for-ready: "true"
     spec:
@@ -239,9 +230,6 @@ objects:
         spec:
           containers:
             - name: kong-proxy
-              # dependsOn:
-              # - name: kong-migration
-              #   condition: Complete
               image: kong:latest
               imagePullPolicy: IfNotPresent
               env:
@@ -249,6 +237,11 @@ objects:
                   value: postgres
                 - name: KONG_PG_HOST
                   value: kong-database
+                - name: KONG_PG_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: kong-database-secret
+                      key: postgres_database   
                 - name: KONG_PG_USER
                   valueFrom:
                     secretKeyRef:
@@ -271,19 +264,14 @@ objects:
                   value: info
                 - name: KONG_ADMIN_LISTEN
                   value: 0.0.0.0:8001
-                # - name: KONG_PORTAL
-                #   value: "on"
               ports:
                 - containerPort: 8000
                 - containerPort: 8001
-                # - containerPort: 8002
-                # - containerPort: 8003
-                # - containerPort: 8004
+
   - kind: Route
     apiVersion: route.openshift.io/v1
     metadata:
       name: api
-      namespace: kong
     spec:
       host: api-kong.apps-crc.testing
       to:
@@ -293,11 +281,11 @@ objects:
       port:
         targetPort: api
       wildcardPolicy: None
+      
   - kind: Route
     apiVersion: route.openshift.io/v1
     metadata:
       name: admin
-      namespace: kong
     spec:
       host: admin-kong.apps-crc.testing
       to:
@@ -307,33 +295,3 @@ objects:
       port:
         targetPort: admin
       wildcardPolicy: None
-
-  # - apiVersion: route.openshift.io/v1
-  #   kind: Route
-  #   metadata:
-  #     name: manager
-  #     namespace: kong
-  #   spec:
-  #     host: manager-kong.apps-crc.testing
-  #     to:
-  #       kind: Service
-  #       name: kong-proxy
-  #       weight: 100
-  #     port:
-  #       targetPort: manager
-  #     wildcardPolicy: None
-
-  # - apiVersion: route.openshift.io/v1
-  #   kind: Route
-  #   metadata:
-  #     name: portal
-  #     namespace: kong
-  #   spec:
-  #     host: portal-kong.apps-crc.testing
-  #     to:
-  #       kind: Service
-  #       name: kong-proxy
-  #       weight: 100
-  #     port:
-  #       targetPort: portal
-  #     wildcardPolicy: None
