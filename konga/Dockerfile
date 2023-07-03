@@ -12,10 +12,10 @@ COPY start.sh .
 # Set the group ownership recursively and change the file permissions
 RUN chgrp -R 0 ${STORAGE_PATH} && \
     chmod -R g=u ${STORAGE_PATH} && \
-    chown -R 1001:0 ${STORAGE_PATH}
+    chown -R 1001 ${STORAGE_PATH}
 
 # Change the user to 1001
 USER 1001
 
 # Start the Konga application
-CMD ["npm", "start"]
+CMD ["./start.sh"]
