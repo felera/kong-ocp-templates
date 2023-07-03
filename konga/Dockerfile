@@ -7,7 +7,7 @@ WORKDIR ${STORAGE_PATH}
 
 USER root
 
-COPY start.sh .
+COPY start.sh ${STORAGE_PATH}/start.sh
 
 # Set the group ownership recursively and change the file permissions
 RUN chgrp -R 0 ${STORAGE_PATH} && \
