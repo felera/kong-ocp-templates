@@ -55,7 +55,7 @@ objects:
     type: Opaque
     data:
       postgres_password: ${postgres_password}
-      postgres_user: ${postgres_password}
+      postgres_user: ${postgres_user}
       postgres_database: ${postgres_database}
 
   - kind: DeploymentConfig
