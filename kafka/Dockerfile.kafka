@@ -1,3 +1,0 @@
-FROM zookeeper:3.4.14
-# RUN chmod -R +777 /conf /data /logs /datalog
-RUN chgrp -R 0 /conf /data /logs /datalog && chmod -R g+rwX /conf /data /logs /datalog
