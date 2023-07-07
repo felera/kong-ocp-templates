@@ -8,17 +8,16 @@ FROM zookeeper:3.4.14
 USER zookeeper
 
 # Set the working directory
-WORKDIR /opt/zookeeper
+# WORKDIR /opt/zookeeper
 
 # Copy the custom configuration file
-COPY zoo.cfg /opt/zookeeper/conf/zoo.cfg
+COPY zoo.cfg /conf/zoo.cfg
 
 # Set the ownership and permissions of the configuration file
 USER root
-RUN mkdir -p /opt/zookeeper/data && mkdir -p /opt/zookeeper/datalog && \
-    chown zookeeper:zookeeper /opt/zookeeper/conf/zoo.cfg && \
-    chmod 644 /opt/zookeeper/conf/zoo.cfg && \
-    chmod -R 700 /opt/zookeeper/data /opt/zookeeper/datalog
+RUN chown zookeeper:zookeeper /conf/zoo.cfg  /docker-entrypoint.sh && \
+    chmod 644 /conf/zoo.cfg && \
+    chmod -R 777 /data /datalog /docker-entrypoint.sh
 
 # Switch back to the non-root user
 USER zookeeper
