@@ -16,7 +16,10 @@ COPY zoo.cfg /opt/zookeeper/conf/zoo.cfg
 # Set the ownership and permissions of the configuration file
 USER root
 RUN chown zookeeper:zookeeper /opt/zookeeper/conf/zoo.cfg && \
-    chmod 644 /opt/zookeeper/conf/zoo.cfg
+    chmod 644 /opt/zookeeper/conf/zoo.cfg && \
+    chmod -R 700 /opt/zookeeper/data /opt/zookeeper/datalog
+
+# Switch back to the non-root user
 USER zookeeper
 
 # Expose the ZooKeeper client port
