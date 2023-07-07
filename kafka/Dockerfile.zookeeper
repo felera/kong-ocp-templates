@@ -1,4 +1,26 @@
+# FROM zookeeper:3.4.14
+# # RUN chmod -R +777 /conf /data /logs /datalog
+# RUN chgrp -R 0 /conf /data /logs /datalog && chmod -R g+rwX /conf /data /logs /datalog
+# USER 1001
 FROM zookeeper:3.4.14
-# RUN chmod -R +777 /conf /data /logs /datalog
-RUN chgrp -R 0 /conf /data /logs /datalog && chmod -R g+rwX /conf /data /logs /datalog
-USER 1001
+
+# Set the user to the non-root user "zookeeper" provided by the base image
+USER zookeeper
+
+# Set the working directory
+WORKDIR /opt/zookeeper
+
+# Copy the custom configuration file
+COPY zoo.cfg /opt/zookeeper/conf/zoo.cfg
+
+# Set the ownership and permissions of the configuration file
+USER root
+RUN chown zookeeper:zookeeper /opt/zookeeper/conf/zoo.cfg && \
+    chmod 644 /opt/zookeeper/conf/zoo.cfg
+USER zookeeper
+
+# Expose the ZooKeeper client port
+EXPOSE 2181
+
+# Start ZooKeeper server
+CMD ["bin/zkServer.sh", "start-foreground"]
